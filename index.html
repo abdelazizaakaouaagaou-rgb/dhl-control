@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHL Logistics - Cloud Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="header-dhl">
+    <div class="logo">DHL <span>Cloud Time Management</span></div>
+</div>
+
+<div class="container">
+    <div class="dashboard">
+        <aside class="card-form">
+            <h3>📦 Registro de Datos</h3>
+            <div class="form-group">
+                <label>Nombre del Colaborador:</label>
+                <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+            </div>
+            <div class="form-group">
+                <label>Fecha:</label>
+                <input type="date" id="fecha">
+            </div>
+            <div class="form-group">
+                <label>Operación:</label>
+                <select id="tipoHora">
+                    <option value="Extra">➕ Hora Extra (x1.0)</option>
+                    <option value="Festiva">➕ Festiva (x1.75)</option>
+                    <option value="ExtraFestiva">➕ Extra Festiva (x1.75)</option>
+                    <option value="Libranza">➖ Libranza (Descuento)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cantidad de Horas:</label>
+                <input type="number" id="cantidad" step="0.1" placeholder="0.0">
+            </div>
+            
+            <div id="mensajeAlerta"></div>
+            
+            <button id="btnGuardar" class="btn-main">VALIDAR Y GRABAR EN NUBE</button>
+            <button id="btnExportar" class="btn-export">📊 DESCARGAR EXCEL (CSV)</button>
+            <button id="btnLimpiar" class="btn-clear">BORRAR TODO EL HISTORIAL</button>
+        </aside>
+
+        <main class="data-display">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <small>GANADAS (TOTAL)</small>
+                    <span id="totalGanadas">0.0</span>
+                </div>
+                <div class="stat-card">
+                    <small>LIBRADAS (TOTAL)</small>
+                    <span id="totalLibradas">0.0</span>
+                </div>
+                <div class="stat-card highlight">
+                    <small>SALDO GLOBAL</small>
+                    <span id="totalSaldo">0.0</span>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>EMPLEADO</th>
+                            <th>FECHA</th>
+                            <th>TIPO</th>
+                            <th>ENTRA</th>
+                            <th>SALE</th>
+                            <th>SALDO PERS.</th>
+                            <th>ACCION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>

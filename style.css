@@ -1,0 +1,23 @@
+:root { --dhl-yellow: #FFCC00; --dhl-red: #D40511; --dark: #333; }
+body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; }
+.header-dhl { background: var(--dhl-red); color: var(--dhl-yellow); padding: 15px 40px; border-bottom: 5px solid var(--dhl-yellow); font-weight: bold; font-size: 1.5rem; }
+.container { padding: 20px; max-width: 1400px; margin: auto; }
+.dashboard { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+.card-form, .data-display { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+h3 { border-left: 5px solid var(--dhl-red); padding-left: 10px; margin-top: 0; }
+.form-group { margin-bottom: 15px; }
+label { font-size: 0.8rem; font-weight: bold; color: #666; display: block; margin-bottom: 5px; }
+input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+.btn-main { background: var(--dhl-red); color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.btn-export { background: #333; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+#mensajeAlerta { margin: 10px 0; font-size: 0.8rem; color: var(--dhl-red); font-weight: bold; min-height: 1.2rem; text-align: center; display: none; background: #fff0f0; padding: 5px; border-radius: 4px; }
+.stats-container { display: flex; gap: 15px; margin-bottom: 20px; }
+.stat-card { flex: 1; background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; border-bottom: 4px solid #ddd; }
+.stat-card.highlight { background: var(--dhl-yellow); border-bottom-color: var(--dhl-red); }
+.stat-card span { display: block; font-size: 1.8rem; font-weight: bold; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th { background: var(--dark); color: white; padding: 12px; text-align: left; }
+td { padding: 12px; border-bottom: 1px solid #eee; }
+.text-green { color: #28a745; font-weight: bold; }
+.text-red { color: var(--dhl-red); font-weight: bold; }
+.btn-clear { background: none; border: 1px solid #ddd; color: #999; margin-top: 30px; cursor: pointer; padding: 8px; width: 100%; border-radius: 4px; } 
