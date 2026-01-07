@@ -18,7 +18,7 @@ const dbRef = ref(db, 'registros_dhl');
 let appData = [];
 
 // --- SISTEMA DE SEGURIDAD ---
-const CLAVE_SISTEMA = "DHL2025"; // 🔑 PUEDES CAMBIAR ESTA CLAVE
+const CLAVE_SISTEMA = "DHL"; // 🔑 PUEDES CAMBIAR ESTA CLAVE
 
 document.getElementById('btnLogin').addEventListener('click', () => {
     const input = document.getElementById('passInput').value;
