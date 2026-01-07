@@ -2,46 +2,40 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA9w8bgR16u-ohUThbKqrpoFxGyif-6mI0",
-  authDomain: "dhl-sistemas.firebaseapp.com",
-  databaseURL: "https://dhl-sistemas-default-rtdb.firebaseio.com",
-  projectId: "dhl-sistemas",
-  storageBucket: "dhl-sistemas.firebasestorage.app",
-  messagingSenderId: "167500803552",
-  appId: "1:167500803552:web:dd8a75e082e184fc9d0f85"
+    apiKey: "AIzaSyA9w8bgR16u-ohUThbKqrpoFxGyif-6mI0",
+    authDomain: "dhl-sistemas.firebaseapp.com",
+    databaseURL: "https://dhl-sistemas-default-rtdb.firebaseio.com",
+    projectId: "dhl-sistemas",
+    storageBucket: "dhl-sistemas.firebasestorage.app",
+    messagingSenderId: "167500803552",
+    appId: "1:167500803552:web:dd8a75e082e184fc9d0f85"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const dbRef = ref(db, 'registros_dhl');
-
+const dbRef = ref(db, 'registros_dhl_pro');
 let appData = [];
 
-// --- SISTEMA DE SEGURIDAD ---
-const CLAVE_SISTEMA = "DHL"; // 🔑 PUEDES CAMBIAR ESTA CLAVE
-
+// --- SEGURIDAD ---
 document.getElementById('btnLogin').addEventListener('click', () => {
-    const input = document.getElementById('passInput').value;
-    if (input === CLAVE_SISTEMA) {
+    if (document.getElementById('passInput').value === "DHL2025") {
         document.getElementById('loginOverlay').style.display = 'none';
-        sessionStorage.setItem('auth_dhl', 'ok');
+        sessionStorage.setItem('dhl_auth', 'ok');
     } else {
         document.getElementById('errorPass').style.display = 'block';
     }
 });
+if(sessionStorage.getItem('dhl_auth') === 'ok') document.getElementById('loginOverlay').style.display = 'none';
 
-window.addEventListener('load', () => {
-    if(sessionStorage.getItem('auth_dhl') === 'ok') {
-        document.getElementById('loginOverlay').style.display = 'none';
-    }
-});
+// --- BUSCADOR ---
+document.getElementById('buscadorNombre').addEventListener('input', refreshUI);
 
-// --- LÓGICA DE NEGOCIO ---
+// --- LÓGICA ---
 function calcularSaldoDe(nombre) {
     let saldo = 0;
     appData.forEach(r => {
         if (r.nombre.toLowerCase() === nombre.toLowerCase()) {
-            let factor = (r.tipo === "Festiva" || r.tipo === "ExtraFestiva") ? 1.75 : 1;
+            let factor = (r.tipo === "Festiva") ? 1.75 : 1;
             if (r.tipo === "Libranza") saldo -= parseFloat(r.horas);
             else saldo += (parseFloat(r.horas) * factor);
         }
@@ -51,45 +45,47 @@ function calcularSaldoDe(nombre) {
 
 onValue(dbRef, (snapshot) => {
     const data = snapshot.val();
-    appData = [];
-    if (data) {
-        Object.keys(data).forEach(id => {
-            appData.push({ idFirebase: id, ...data[id] });
-        });
-    }
+    appData = data ? Object.keys(data).map(id => ({ id, ...data[id] })) : [];
     refreshUI();
 });
 
 function refreshUI() {
     const tableBody = document.getElementById('tableBody');
+    const filtro = document.getElementById('buscadorNombre').value.toLowerCase();
     tableBody.innerHTML = "";
-    let totalG = 0; let totalL = 0;
+    let tG = 0, tL = 0;
+    
     appData.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-    let saldosTemporales = {};
+    let saldosPersonales = {};
 
-    appData.forEach((rec) => {
-        let f = (rec.tipo === "Festiva" || rec.tipo === "ExtraFestiva") ? 1.75 : 1;
-        let e = rec.tipo !== "Libranza" ? rec.horas * f : 0;
-        let s = rec.tipo === "Libranza" ? rec.horas : 0;
-        totalG += e; totalL += s;
-        let n = rec.nombre.toLowerCase();
-        saldosTemporales[n] = (saldosTemporales[n] || 0) + (e - s);
+    appData.forEach(r => {
+        let factor = (r.tipo === "Festiva") ? 1.75 : 1;
+        let entra = r.tipo !== "Libranza" ? r.horas * factor : 0;
+        let sale = r.tipo === "Libranza" ? r.horas : 0;
+        
+        tG += entra; tL += sale;
+        let n = r.nombre.toLowerCase();
+        saldosPersonales[n] = (saldosPersonales[n] || 0) + (entra - sale);
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${rec.nombre.toUpperCase()}</strong></td>
-            <td>${rec.fecha}</td>
-            <td>${rec.tipo}</td>
-            <td class="text-green">${e > 0 ? '+' + e.toFixed(2) : '-'}</td>
-            <td class="text-red">${s > 0 ? '-' + s.toFixed(2) : '-'}</td>
-            <td style="background:#f9f9f9"><strong>${saldosTemporales[n].toFixed(2)} h</strong></td>
-            <td><button onclick="eliminarRegistro('${rec.idFirebase}')" style="border:none; background:none; cursor:pointer;">🗑️</button></td>
-        `;
-        tableBody.prepend(tr);
+        // FILTRO DE BÚSQUEDA
+        if (r.nombre.toLowerCase().includes(filtro)) {
+            tableBody.innerHTML += `
+                <tr>
+                    <td><strong>${r.nombre.toUpperCase()}</strong></td>
+                    <td>${r.tipo}</td>
+                    <td>${r.fecha}</td>
+                    <td style="color:green">+${entra.toFixed(1)}</td>
+                    <td style="color:red">${sale > 0 ? '-' + sale.toFixed(1) : '-'}</td>
+                    <td><strong>${saldosPersonales[n].toFixed(1)}h</strong></td>
+                    <td class="comentario-celda">${r.comentario || ''}</td>
+                    <td><button onclick="window.del('${r.id}')" style="cursor:pointer; border:none; background:none;">🗑️</button></td>
+                </tr>`;
+        }
     });
-    document.getElementById('totalGanadas').innerText = totalG.toFixed(2);
-    document.getElementById('totalLibradas').innerText = totalL.toFixed(2);
-    document.getElementById('totalSaldo').innerText = (totalG - totalL).toFixed(2);
+    
+    document.getElementById('totalGanadas').innerText = tG.toFixed(1);
+    document.getElementById('totalLibradas').innerText = tL.toFixed(1);
+    document.getElementById('totalSaldo').innerText = (tG - tL).toFixed(1);
 }
 
 document.getElementById('btnGuardar').addEventListener('click', () => {
@@ -97,41 +93,38 @@ document.getElementById('btnGuardar').addEventListener('click', () => {
     const fecha = document.getElementById('fecha').value;
     const tipo = document.getElementById('tipoHora').value;
     const horas = parseFloat(document.getElementById('cantidad').value);
+    const comentario = document.getElementById('comentario').value.trim();
     const msg = document.getElementById('mensajeAlerta');
 
-    if (!nombre || !fecha || isNaN(horas)) return alert("Faltan datos");
+    if(!nombre || !fecha || isNaN(horas)) return alert("⚠️ Rellena los campos obligatorios.");
 
     if (tipo === "Libranza") {
-        const saldoAct = calcularSaldoDe(nombre);
-        if (horas > saldoAct) {
-            msg.innerText = `🚫 BLOQUEO: SALDO INSUFICIENTE (${saldoAct.toFixed(2)}h)`;
+        const saldoDisp = calcularSaldoDe(nombre);
+        if (horas > saldoDisp) {
+            msg.innerText = `🚫 SALDO INSUFICIENTE PARA LIBRAR (${saldoDisp.toFixed(1)}h)`;
             msg.style.display = "block";
             return;
         }
     }
-    push(dbRef, { nombre, fecha, tipo, horas });
+
+    push(dbRef, { nombre, fecha, tipo, horas, comentario });
     document.getElementById('cantidad').value = "";
+    document.getElementById('comentario').value = "";
     msg.style.display = "none";
 });
 
-window.eliminarRegistro = (id) => {
-    if(confirm("¿Eliminar registro?")) remove(ref(db, `registros_dhl/${id}`));
-};
+window.del = (id) => { if(confirm("¿Eliminar registro?")) remove(ref(db, `registros_dhl_pro/${id}`)); };
 
 document.getElementById('btnExportar').addEventListener('click', () => {
-    let csv = "Empleado,Fecha,Tipo,Horas Reales,Horas Calculadas\n";
+    let csv = "Empleado,Fecha,Concepto,Horas,Calculadas,Comentarios\n";
     appData.forEach(r => {
-        let f = (r.tipo === "Festiva" || r.tipo === "ExtraFestiva") ? 1.75 : 1;
+        let f = (r.tipo === "Festiva") ? 1.75 : 1;
         let c = r.tipo === "Libranza" ? -r.horas : r.horas * f;
-        csv += `${r.nombre},${r.fecha},${r.tipo},${r.horas},${c.toFixed(2)}\n`;
+        csv += `${r.nombre},${r.fecha},${r.tipo},${r.horas},${c},${r.comentario || ''}\n`;
     });
     const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "Reporte_DHL.csv";
+    a.download = `DHL_Gerencia_Report.csv`;
     a.click();
-});
-
-document.getElementById('btnLimpiar').addEventListener('click', () => {
-    if(confirm("¿BORRAR TODO?")) remove(dbRef);
 });
