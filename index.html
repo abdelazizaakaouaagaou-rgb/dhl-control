@@ -3,13 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DHL Logistics - Cloud Management</title>
+    <title>DHL Logistics - Secure Cloud</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#D40511; z-index:9999; display:flex; justify-content:center; align-items:center; flex-direction:column;">
+    <div style="background:white; padding:40px; border-radius:8px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.3); width:320px;">
+        <h1 style="color:#D40511; margin-bottom:10px; font-family:sans-serif;">DHL</h1>
+        <p style="font-weight:bold; color:#333; margin-bottom:20px;">CONTROL DE TIEMPOS</p>
+        <input type="password" id="passInput" placeholder="Contraseña de Acceso" style="width:100%; padding:12px; margin-bottom:20px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; text-align:center; font-size:1.1rem;">
+        <button id="btnLogin" style="width:100%; background:#D40511; color:white; border:none; padding:15px; border-radius:4px; font-weight:bold; cursor:pointer;">ENTRAR AL SISTEMA</button>
+        <p id="errorPass" style="color:red; font-size:0.8rem; margin-top:15px; display:none; font-weight:bold;">⚠️ CLAVE INCORRECTA</p>
+    </div>
+</div>
+
 <div class="header-dhl">
-    <div class="logo">DHL <span>Cloud Time Management</span></div>
+    <div class="logo">DHL <span>Cloud Management</span></div>
 </div>
 
 <div class="container">
@@ -37,9 +47,7 @@
                 <label>Cantidad de Horas:</label>
                 <input type="number" id="cantidad" step="0.1" placeholder="0.0">
             </div>
-            
             <div id="mensajeAlerta"></div>
-            
             <button id="btnGuardar" class="btn-main">VALIDAR Y GRABAR EN NUBE</button>
             <button id="btnExportar" class="btn-export">📊 DESCARGAR EXCEL (CSV)</button>
             <button id="btnLimpiar" class="btn-clear">BORRAR TODO EL HISTORIAL</button>

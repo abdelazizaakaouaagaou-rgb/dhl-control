@@ -20,4 +20,4 @@ th { background: var(--dark); color: white; padding: 12px; text-align: left; }
 td { padding: 12px; border-bottom: 1px solid #eee; }
 .text-green { color: #28a745; font-weight: bold; }
 .text-red { color: var(--dhl-red); font-weight: bold; }
-.btn-clear { background: none; border: 1px solid #ddd; color: #999; margin-top: 30px; cursor: pointer; padding: 8px; width: 100%; border-radius: 4px; } 
+.btn-clear { background: none; border: 1px solid #ddd; color: #999; margin-top: 30px; cursor: pointer; padding: 8px; width: 100%; border-radius: 4px; }
