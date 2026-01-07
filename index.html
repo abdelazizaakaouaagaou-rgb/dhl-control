@@ -26,7 +26,7 @@
     <div class="dashboard">
         <aside class="card-form">
             <h3>📦 Registro Administrativo</h3>
-            <div class="form-group"><label>Nombre del Colaborador:</label><input type="text" id="nombre"></div>
+            <div class="form-group"><label>Nombre del Colaborador:</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
             <div class="form-group"><label>Fecha:</label><input type="date" id="fecha"></div>
             <div class="form-group">
                 <label>Tipo de Concepto:</label>
@@ -43,7 +43,7 @@
             
             <div id="mensajeAlerta"></div>
             <button id="btnGuardar" class="btn-main">GRABAR EN NUBE</button>
-            <button id="btnExportar" class="btn-export">📊 EXCEL PARA GERENCIA</button>
+            <button id="btnExportar" class="btn-export">📊 EXCEL (SEGÚN BÚSQUEDA)</button>
         </aside>
 
         <main class="data-display">
@@ -53,8 +53,9 @@
                 <div class="stat-card highlight"><small>SALDO DISPONIBLE</small><span id="totalSaldo">0.0</span></div>
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <input type="text" id="buscadorNombre" placeholder="🔍 Buscar por nombre de empleado..." style="padding: 12px; border: 2px solid var(--dhl-yellow); font-weight: bold;">
+            <div style="background: var(--dhl-yellow); padding: 10px; border-radius: 4px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: bold; font-size: 0.8rem;">FILTRAR VISTA:</span>
+                <input type="text" id="buscadorNombre" placeholder="Escribe el nombre para buscar o exportar..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
 
             <div class="table-wrapper">

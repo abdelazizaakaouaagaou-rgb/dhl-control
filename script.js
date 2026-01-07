@@ -63,12 +63,12 @@ function refreshUI() {
         let entra = r.tipo !== "Libranza" ? r.horas * factor : 0;
         let sale = r.tipo === "Libranza" ? r.horas : 0;
         
-        tG += entra; tL += sale;
         let n = r.nombre.toLowerCase();
         saldosPersonales[n] = (saldosPersonales[n] || 0) + (entra - sale);
 
-        // FILTRO DE BÚSQUEDA
+        // Si el registro coincide con el buscador o si el buscador está vacío
         if (r.nombre.toLowerCase().includes(filtro)) {
+            tG += entra; tL += sale;
             tableBody.innerHTML += `
                 <tr>
                     <td><strong>${r.nombre.toUpperCase()}</strong></td>
@@ -116,15 +116,20 @@ document.getElementById('btnGuardar').addEventListener('click', () => {
 window.del = (id) => { if(confirm("¿Eliminar registro?")) remove(ref(db, `registros_dhl_pro/${id}`)); };
 
 document.getElementById('btnExportar').addEventListener('click', () => {
+    const filtro = document.getElementById('buscadorNombre').value.toLowerCase();
     let csv = "Empleado,Fecha,Concepto,Horas,Calculadas,Comentarios\n";
+    
     appData.forEach(r => {
-        let f = (r.tipo === "Festiva") ? 1.75 : 1;
-        let c = r.tipo === "Libranza" ? -r.horas : r.horas * f;
-        csv += `${r.nombre},${r.fecha},${r.tipo},${r.horas},${c},${r.comentario || ''}\n`;
+        if (r.nombre.toLowerCase().includes(filtro)) {
+            let f = (r.tipo === "Festiva") ? 1.75 : 1;
+            let c = r.tipo === "Libranza" ? -r.horas : r.horas * f;
+            csv += `${r.nombre},${r.fecha},${r.tipo},${r.horas},${c},${r.comentario || ''}\n`;
+        }
     });
+    
     const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `DHL_Gerencia_Report.csv`;
+    a.download = filtro ? `DHL_Reporte_${filtro}.csv` : "DHL_Reporte_General.csv";
     a.click();
 });

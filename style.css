@@ -8,6 +8,7 @@ h3 { border-left: 5px solid var(--dhl-red); padding-left: 10px; margin-top: 0; c
 .form-group { margin-bottom: 12px; }
 label { font-size: 0.75rem; font-weight: bold; color: #555; display: block; margin-bottom: 3px; }
 input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+#buscadorNombre:focus { outline: 2px solid var(--dhl-red); border-color: transparent; }
 .btn-main { background: var(--dhl-red); color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 .btn-export { background: #1D6F42; color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 #mensajeAlerta { margin: 10px 0; font-size: 0.8rem; color: var(--dhl-red); font-weight: bold; display: none; background: #fff0f0; padding: 5px; border-radius: 4px; border: 1px solid var(--dhl-red); }
@@ -15,8 +16,8 @@ input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius
 .stat-card { flex: 1; background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; border-bottom: 4px solid #ddd; }
 .stat-card.highlight { background: var(--dhl-yellow); border-bottom-color: var(--dhl-red); }
 .stat-card span { display: block; font-size: 1.8rem; font-weight: bold; }
-.table-wrapper { overflow-x: auto; }
+.table-wrapper { overflow-x: auto; max-height: 500px; }
 table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-th { background: var(--dark); color: white; padding: 12px; text-align: left; }
+th { background: var(--dark); color: white; padding: 12px; text-align: left; position: sticky; top: 0; }
 td { padding: 10px; border-bottom: 1px solid #eee; }
 .comentario-celda { font-style: italic; color: #666; font-size: 0.8rem; }
