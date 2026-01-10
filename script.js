@@ -1,135 +1,68 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyA9w8bgR16u-ohUThbKqrpoFxGyif-6mI0",
-    authDomain: "dhl-sistemas.firebaseapp.com",
-    databaseURL: "https://dhl-sistemas-default-rtdb.firebaseio.com",
-    projectId: "dhl-sistemas",
-    storageBucket: "dhl-sistemas.firebasestorage.app",
-    messagingSenderId: "167500803552",
-    appId: "1:167500803552:web:dd8a75e082e184fc9d0f85"
+  apiKey: "AIzaSyAlvAjkgoNB93HMgeV4UoZsNCi_q6kBy9c",
+  authDomain: "titan-hub-cloud.firebaseapp.com",
+  databaseURL: "https://titan-hub-cloud-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "titan-hub-cloud",
+  storageBucket: "titan-hub-cloud.firebasestorage.app",
+  messagingSenderId: "620485722056",
+  appId: "1:620485722056:web:c3effc37049ea9948f0afd"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const dbRef = ref(db, 'registros_dhl_pro');
-let appData = [];
+const dbRef = ref(db, 'atletas_pro');
+let filtroActual = 'todos';
 
-// --- SEGURIDAD ---
-document.getElementById('btnLogin').addEventListener('click', () => {
-    if (document.getElementById('passInput').value === "DHL2025") {
-        document.getElementById('loginOverlay').style.display = 'none';
-        sessionStorage.setItem('dhl_auth', 'ok');
-    } else {
-        document.getElementById('errorPass').style.display = 'block';
-    }
-});
-if(sessionStorage.getItem('dhl_auth') === 'ok') document.getElementById('loginOverlay').style.display = 'none';
+// FUNCIONES DE CONTROL
+window.updateData = (id, campo, valor) => update(ref(db, `atletas_pro/${id}`), { [campo]: valor });
+window.borrar = (id) => confirm("¿Eliminar definitivamente?") && remove(ref(db, `atletas_pro/${id}`));
+window.setFiltro = (f) => { filtroActual = f; render(); };
 
-// --- BUSCADOR ---
-document.getElementById('buscadorNombre').addEventListener('input', refreshUI);
+window.enviarWhatsApp = (nombre, tel, plan) => {
+    const msg = encodeURIComponent(`Hola ${nombre}! Tu entrenamiento para hoy: ${plan}`);
+    window.open(`https://api.whatsapp.com/send?phone=${tel}&text=${msg}`);
+};
 
-// --- LÓGICA ---
-function calcularSaldoDe(nombre) {
-    let saldo = 0;
-    appData.forEach(r => {
-        if (r.nombre.toLowerCase() === nombre.toLowerCase()) {
-            let factor = (r.tipo === "Festiva") ? 1.75 : 1;
-            if (r.tipo === "Libranza") saldo -= parseFloat(r.horas);
-            else saldo += (parseFloat(r.horas) * factor);
-        }
-    });
-    return saldo;
-}
+// MOTOR DE RENDERIZADO
+window.render = () => {
+    onValue(dbRef, (snapshot) => {
+        const list = document.getElementById('atletaList');
+        const search = document.getElementById('busqueda').value.toLowerCase();
+        list.innerHTML = "";
+        let kpi = { total: 0, ok: 0, deuda: 0 };
 
-onValue(dbRef, (snapshot) => {
-    const data = snapshot.val();
-    appData = data ? Object.keys(data).map(id => ({ id, ...data[id] })) : [];
-    refreshUI();
-});
+        snapshot.forEach((child) => {
+            const a = child.val();
+            if(!a.nombre.toLowerCase().includes(search)) return;
+            if(filtroActual === 'pagos' && a.pago === 'PAGADO') return;
 
-function refreshUI() {
-    const tableBody = document.getElementById('tableBody');
-    const filtro = document.getElementById('buscadorNombre').value.toLowerCase();
-    tableBody.innerHTML = "";
-    let tG = 0, tL = 0;
-    
-    appData.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-    let saldosPersonales = {};
+            kpi.total++;
+            if(a.check) kpi.ok++;
+            if(a.pago === 'PENDIENTE') kpi.deuda += 50;
 
-    appData.forEach(r => {
-        let factor = (r.tipo === "Festiva") ? 1.75 : 1;
-        let entra = r.tipo !== "Libranza" ? r.horas * factor : 0;
-        let sale = r.tipo === "Libranza" ? r.horas : 0;
-        
-        let n = r.nombre.toLowerCase();
-        saldosPersonales[n] = (saldosPersonales[n] || 0) + (entra - sale);
-
-        // Si el registro coincide con el buscador o si el buscador está vacío
-        if (r.nombre.toLowerCase().includes(filtro)) {
-            tG += entra; tL += sale;
-            tableBody.innerHTML += `
+            list.innerHTML += `
                 <tr>
-                    <td><strong>${r.nombre.toUpperCase()}</strong></td>
-                    <td>${r.tipo}</td>
-                    <td>${r.fecha}</td>
-                    <td style="color:green">+${entra.toFixed(1)}</td>
-                    <td style="color:red">${sale > 0 ? '-' + sale.toFixed(1) : '-'}</td>
-                    <td><strong>${saldosPersonales[n].toFixed(1)}h</strong></td>
-                    <td class="comentario-celda">${r.comentario || ''}</td>
-                    <td><button onclick="window.del('${r.id}')" style="cursor:pointer; border:none; background:none;">🗑️</button></td>
+                    <td><strong>${a.nombre.toUpperCase()}</strong></td>
+                    <td><button class="btn-wa" onclick="window.enviarWhatsApp('${a.nombre}','${a.tel}','${a.plan}')">📞</button></td>
+                    <td><input class="plan-input" value="${a.plan}" onchange="window.updateData('${child.key}', 'plan', this.value)"></td>
+                    <td><button class="status-pill ${a.pago}" onclick="window.updateData('${child.key}','pago','${a.pago==='PAGADO'?'PENDIENTE':'PAGADO'}')">${a.pago}</button></td>
+                    <td><button onclick="window.updateData('${child.key}','check', ${!a.check})" style="background:none; border:none; cursor:pointer; font-size:1.5rem">${a.check ? '✅' : '⚪'}</button></td>
+                    <td><button onclick="window.borrar('${child.key}')" style="color:#333; border:none; background:none; cursor:pointer">🗑️</button></td>
                 </tr>`;
-        }
+        });
+        document.getElementById('totalAtletas').innerText = kpi.total;
+        document.getElementById('totalCheckin').innerText = kpi.ok;
+        document.getElementById('totalDeuda').innerText = kpi.deuda + "€";
     });
-    
-    document.getElementById('totalGanadas').innerText = tG.toFixed(1);
-    document.getElementById('totalLibradas').innerText = tL.toFixed(1);
-    document.getElementById('totalSaldo').innerText = (tG - tL).toFixed(1);
-}
+};
 
-document.getElementById('btnGuardar').addEventListener('click', () => {
-    const nombre = document.getElementById('nombre').value.trim();
-    const fecha = document.getElementById('fecha').value;
-    const tipo = document.getElementById('tipoHora').value;
-    const horas = parseFloat(document.getElementById('cantidad').value);
-    const comentario = document.getElementById('comentario').value.trim();
-    const msg = document.getElementById('mensajeAlerta');
+document.getElementById('btnNuevo').onclick = () => {
+    const n = prompt("Nombre:");
+    const t = prompt("Teléfono (con código país, ej: 34600...):");
+    if(n && t) push(dbRef, { nombre: n, tel: t, plan: "Pendiente", pago: "PENDIENTE", check: false });
+};
 
-    if(!nombre || !fecha || isNaN(horas)) return alert("⚠️ Rellena los campos obligatorios.");
-
-    if (tipo === "Libranza") {
-        const saldoDisp = calcularSaldoDe(nombre);
-        if (horas > saldoDisp) {
-            msg.innerText = `🚫 SALDO INSUFICIENTE PARA LIBRAR (${saldoDisp.toFixed(1)}h)`;
-            msg.style.display = "block";
-            return;
-        }
-    }
-
-    push(dbRef, { nombre, fecha, tipo, horas, comentario });
-    document.getElementById('cantidad').value = "";
-    document.getElementById('comentario').value = "";
-    msg.style.display = "none";
-});
-
-window.del = (id) => { if(confirm("¿Eliminar registro?")) remove(ref(db, `registros_dhl_pro/${id}`)); };
-
-document.getElementById('btnExportar').addEventListener('click', () => {
-    const filtro = document.getElementById('buscadorNombre').value.toLowerCase();
-    let csv = "Empleado,Fecha,Concepto,Horas,Calculadas,Comentarios\n";
-    
-    appData.forEach(r => {
-        if (r.nombre.toLowerCase().includes(filtro)) {
-            let f = (r.tipo === "Festiva") ? 1.75 : 1;
-            let c = r.tipo === "Libranza" ? -r.horas : r.horas * f;
-            csv += `${r.nombre},${r.fecha},${r.tipo},${r.horas},${c},${r.comentario || ''}\n`;
-        }
-    });
-    
-    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filtro ? `DHL_Reporte_${filtro}.csv` : "DHL_Reporte_General.csv";
-    a.click();
-});
+render();
